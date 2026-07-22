@@ -1,0 +1,2 @@
+audit,trials,max_abs_delta_ci_minus_delta_phi,mean_abs_delta_ci_minus_delta_phi,passed_at_tolerance_1e-9,claim_boundary
+exact_potential_identity,200,5.284661597215745e-14,1.361577517400292e-14,1,formula consistency only; not global optimality or physical validity

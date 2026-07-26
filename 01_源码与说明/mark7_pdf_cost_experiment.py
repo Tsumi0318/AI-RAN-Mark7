@@ -2,9 +2,8 @@
 """Mark7: PDF cost structure with an independent semantic-to-game run.
 
 With --full, this entry point starts from the fixed Alibaba task sample, generates
-fresh task-level semantic predictions, then runs a fresh DeepSeek Game Master and
-the deterministic Python best-response verifier. Every full run uses unique cache
-files so that a previous experiment cannot silently supply semantic predictions.
+task-level semantic predictions, then runs the DeepSeek Game Master and the
+deterministic Python best-response verifier. Each run writes a run-specific cache.
 """
 
 from __future__ import annotations
@@ -301,9 +300,11 @@ def main() -> None:
     else:
         semantic_path = OUT / "semantic_resource_predictions.csv"
         if not semantic_path.exists():
-            semantic_path = OUT / "semantic_resource_predictions_reused.csv"
+            raise FileNotFoundError(
+                "semantic_resource_predictions.csv is missing; run --full before --deterministic"
+            )
         semantic = pd.read_csv(semantic_path)
-        semantic_manifest = {"stage": "loaded_existing_semantic_artifact", "output_file": display_path(semantic_path), "task_count": len(semantic)}
+        semantic_manifest = {"stage": "loaded_semantic_artifact", "output_file": display_path(semantic_path), "task_count": len(semantic)}
     validate_semantic_artifact(semantic, intents)
     calibration = semantic_calibration(semantic, c.n_main)
     q5, points = m5.fit_multigpu_delay(c)

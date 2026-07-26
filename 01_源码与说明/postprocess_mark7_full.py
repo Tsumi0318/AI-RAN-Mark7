@@ -30,7 +30,7 @@ def main() -> None:
     queue5, _ = m5.fit_multigpu_delay(c)
     memory, vram_points = m5.fit_vram_barrier(c)
     scheduler = m5.scheduler_summary()
-    selected = pd.read_csv(OUT / "selected_model_B_metrics.csv").iloc[0]
+    selected = pd.read_csv(OUT / "queue_model_metrics.csv").iloc[0]
     queue_stub = {"card_count_c": queue5["card_count_c"], "mu_card_per_second": queue5["mu_card_per_second"], "lambda_per_task_per_second": 0.0}
     pool = m5.load_request_pool(c)
     _, arrays = m5.build_intents(pool, c)
@@ -47,7 +47,7 @@ def main() -> None:
     dcomp_args = (selected.D_overhead_seconds, selected.scale, selected["lambda"], selected.mu_pool_effective_per_second)
 
     def make_model(n: int):
-        return mk7.build_pdf_cost_model(m5, c, arrays, semantic, queue_stub, memory, scheduler, n, mk7.ModelB(*dcomp_args), calibration)
+        return mk7.build_pdf_cost_model(m5, c, arrays, semantic, queue_stub, memory, scheduler, n, mk7.PooledUtilizationModel(*dcomp_args), calibration)
 
     main_model = make_model(c.n_main)
     strategy_df = pd.read_csv(OUT / "model_equilibrium_strategies.csv")

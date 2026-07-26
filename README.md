@@ -6,8 +6,6 @@
 
 在阅读结果前需要明确三项边界：主实验总代价是归一化无量纲指标；`V_max=16 GB` 与 `K_cap=80` 是模拟器假设，不是 GenTD26 提供的硬件规格；Memory Violation Rate 是软件容量代理，不是真实 CUDA OOM。DeepSeek Game Master 的本次记录平均时延为 `1455.19 ms`、P95 为 `1933.32 ms`，当前结果只支持离线机制验证，不支持实时 RAN 部署结论。
 
-仓库仍保留 `semantic_resource_predictions_reused.csv` 作为历史复放归档，但本次结果文件已经由 `--full` 用新的语义预测和新的 Game Master 缓存重写。
-
 ## 1 系统模型与理论建模
 
 ### 1.1 网络场景与变量定义
@@ -428,7 +426,7 @@ DeepSeek 语义解析器针对每个任务返回：
 \bar m=\frac{1}{N}\sum_{i=1}^{N}m_i
 ```
 
-完整运行时，程序用固定种子从阿里任务池构造 200 条 Intent，并以一个新的、带运行标识的缓存文件调用 `deepseek-v4-flash`。由于本实验只需要结构化数值反馈，API 请求显式设置 `thinking=disabled`，并使用 `max_tokens=512`，避免无关推理耗尽输出预算。每条语义预测同时保存任务 `intent_hash`、请求模型、服务端实际模型、时延、Token 数、解析状态和缓存状态到 `semantic_resource_predictions.csv`；`semantic_generation_manifest.json` 记录任务数、API 调用数、模型、温度、思考模式、Token 上限、Intent 哈希和缓存文件名。旧的 `semantic_resource_predictions_reused.csv` 仅保留为历史归档，完整运行和后处理不再读取它。
+完整运行时，程序用固定种子从阿里任务池构造 200 条 Intent，并以带 UTC 运行标识的缓存文件调用 `deepseek-v4-flash`。由于本实验只需要结构化数值反馈，API 请求显式设置 `thinking=disabled`，并使用 `max_tokens=512`，避免无关推理耗尽输出预算。每条语义预测同时保存任务 `intent_hash`、请求模型、服务端实际模型、时延、Token 数、解析状态和缓存状态到 `semantic_resource_predictions.csv`；`semantic_generation_manifest.json` 记录任务数、API 调用数、模型、温度、思考模式、Token 上限、Intent 哈希和缓存文件名。
 
 聚合校准参数保存在 `semantic_parameter_calibration.csv`。使用全局均值使所有节点面对同一个只依赖卸载总数 `K` 的共享中心代价 `G(K)`，从而保留精确势函数证明所需的结构；代价是不同长 Prompt、Steps、LoRA 和图片数量任务之间的细粒度差异不会直接进入每次最佳响应。
 
@@ -667,7 +665,7 @@ export DEEPSEEK_API_KEY=YOUR_KEY
 .venv/bin/python 01_源码与说明/plot_mark7_full_results.py
 ```
 
-`--full` 不读取旧的语义预测或旧的 Game Master 缓存。它会创建带 UTC 运行标识的新缓存文件，重新生成 200 条语义预测，再完成中心协调与博弈计算。实际 API 数、Token 数和时延写入 `semantic_generation_manifest.json`、`llm_coordination_overhead.csv` 和 `run_summary.json`。
+`--full` 会创建带 UTC 运行标识的新缓存文件，生成 200 条语义预测，再完成中心协调与博弈计算。实际 API 数、Token 数和时延写入 `semantic_generation_manifest.json`、`llm_coordination_overhead.csv` 和 `run_summary.json`。
 
 不调用 API 的公式与流程核验：
 

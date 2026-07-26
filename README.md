@@ -1,10 +1,12 @@
 # 基于拥塞势博弈与大语言模型协同的 AI-RAN 计算卸载实验
 
-本仓库实现一个可复现的 AI-RAN 二元计算卸载实验。实验使用阿里巴巴公开的 GenTD26 匿名生产轨迹构造节点任务与中心资源状态。任务语义倍率来自已经保存的 200 条 DeepSeek 预测，本次运行直接复用这些记录，没有为语义预测发起新的 API 调用；中心 Game Master 在最佳响应过程中完成 796 次逻辑协调，其中 248 次为本次真实 API 调用、548 次命中缓存。中心拥塞与显存公式分项由确定性 Python 提供并复算，DeepSeek 返回中心代价、影响说明和语义警告。因此，本实验验证的是“LLM 语义反馈 + Python 公式约束”的协调流程，不是由 LLM 独立推导中心代价。
+本仓库实现一个可复现的 AI-RAN 二元计算卸载实验。完整运行从阿里巴巴公开的 GenTD26 匿名生产轨迹抽取固定的 200 条任务，重新调用 DeepSeek 生成每条任务的语义资源预测，再以其中前 100 条任务执行中心 Game Master 协调、异步最佳响应和 PSNE 检查。中心拥塞与显存公式分项由确定性 Python 提供并复算，DeepSeek 返回语义资源倍率、中心代价、影响说明和语义警告。因此，本实验验证的是“LLM 语义反馈 + Python 公式约束”的协调流程，不是由 LLM 独立推导中心代价。
 
 本实验验证的是：在本次固定数据、参数和仿真假设下，异步最佳响应是否到达一个经过全节点检查的 PSNE。PSNE 不等于系统总代价的全局最优，也不代表该系统已经能够投入生产环境。
 
-在阅读结果前需要明确三项边界：主实验总代价是归一化无量纲指标；`V_max=16 GB` 与 `K_cap=80` 是模拟器假设，不是 GenTD26 提供的硬件规格；Memory Violation Rate 是软件容量代理，不是真实 CUDA OOM。DeepSeek Game Master 的记录平均时延为 `1397.05 ms`、P95 为 `1861.96 ms`，当前结果只支持离线机制验证，不支持实时 RAN 部署结论。
+在阅读结果前需要明确三项边界：主实验总代价是归一化无量纲指标；`V_max=16 GB` 与 `K_cap=80` 是模拟器假设，不是 GenTD26 提供的硬件规格；Memory Violation Rate 是软件容量代理，不是真实 CUDA OOM。DeepSeek Game Master 的本次记录平均时延为 `1455.19 ms`、P95 为 `1933.32 ms`，当前结果只支持离线机制验证，不支持实时 RAN 部署结论。
+
+仓库仍保留 `semantic_resource_predictions_reused.csv` 作为历史复放归档，但本次结果文件已经由 `--full` 用新的语义预测和新的 Game Master 缓存重写。
 
 ## 1 系统模型与理论建模
 
@@ -168,14 +170,14 @@ D_{\mathrm{comp}}(K)
 
 | 参数或拟合指标 | 本次取值 | 来源 |
 |---|---:|---|
-| `q_bar` | 1.235 | 100 条主任务的 LLM 预测均值 |
+| `q_bar` | 1.199 | 100 条主任务的 LLM 预测均值 |
 | `c` | 109 | 数据派生的服务容器数量代理，不等同于物理 GPU 卡数 |
 | `mu_card,data` | 0.044483 task/s | 推理时延数据派生 |
-| `mu_card,eff` | 0.036019 task/s | `mu_card,data/q_bar` |
-| `c*mu_card,eff` | 3.926030 task/s | 池化有效服务率 |
-| `D_overhead` | 0.212791 s | 数据拟合 |
-| `a` | 2.5230e-6 | 数据拟合 |
-| `lambda` | 0.039260 | 数据拟合 |
+| `mu_card,eff` | 0.037100 task/s | `mu_card,data/q_bar` |
+| `c*mu_card,eff` | 4.043909 task/s | 池化有效服务率 |
+| `D_overhead` | 0.212794 s | 数据拟合 |
+| `a` | 2.3966e-6 | 数据拟合 |
+| `lambda` | 0.040439 | 数据拟合 |
 | R-squared | 0.02038 | 拟合质量 |
 | MAE | 35.154 ms | 拟合质量 |
 | RMSE | 52.764 ms | 拟合质量 |
@@ -426,9 +428,9 @@ DeepSeek 语义解析器针对每个任务返回：
 \bar m=\frac{1}{N}\sum_{i=1}^{N}m_i
 ```
 
-逐任务预测保存在 `semantic_resource_predictions_reused.csv`，聚合校准参数保存在 `semantic_parameter_calibration.csv`。使用全局均值使所有节点面对同一个只依赖卸载总数 `K` 的共享中心代价 `G(K)`，从而保留精确势函数证明所需的结构；代价是不同长 Prompt、Steps、LoRA 和图片数量任务之间的细粒度差异不会直接进入每次最佳响应。
+完整运行时，程序用固定种子从阿里任务池构造 200 条 Intent，并以一个新的、带运行标识的缓存文件调用 `deepseek-v4-flash`。由于本实验只需要结构化数值反馈，API 请求显式设置 `thinking=disabled`，并使用 `max_tokens=512`，避免无关推理耗尽输出预算。每条语义预测同时保存任务 `intent_hash`、请求模型、服务端实际模型、时延、Token 数、解析状态和缓存状态到 `semantic_resource_predictions.csv`；`semantic_generation_manifest.json` 记录任务数、API 调用数、模型、温度、思考模式、Token 上限、Intent 哈希和缓存文件名。旧的 `semantic_resource_predictions_reused.csv` 仅保留为历史归档，完整运行和后处理不再读取它。
 
-本次运行复用了上述 200 条已保存语义预测，`semantic_real_api_calls_this_run=0`。这保证了当前结果可复查，但不能把本次运行描述为重新执行了 200 次实时语义预测。
+聚合校准参数保存在 `semantic_parameter_calibration.csv`。使用全局均值使所有节点面对同一个只依赖卸载总数 `K` 的共享中心代价 `G(K)`，从而保留精确势函数证明所需的结构；代价是不同长 Prompt、Steps、LoRA 和图片数量任务之间的细粒度差异不会直接进入每次最佳响应。
 
 ### 2.2 中心 Game Master 反馈
 
@@ -504,12 +506,12 @@ Python 预先提供 `D_comp` 与 `M` 的公式分项，并始终重新计算上�
 | 指标 | 结果 |
 |---|---:|
 | 节点数 `N` | 100 |
-| 最终卸载数 `K*` | 62 |
-| 最佳响应更新次数 | 796 |
-| 实际策略变化次数 | 71 |
-| 最终势函数 | 111.3383 |
+| 最终卸载数 `K*` | 63 |
+| 最佳响应更新次数 | 858 |
+| 实际策略变化次数 | 70 |
+| 最终势函数 | 110.0005 |
 | 全节点 PSNE 检查 | 通过 |
-| 势函数恒等式最大误差 | `5.28e-14` |
+| 势函数恒等式最大误差 | `5.40e-14` |
 
 结果支持“本次有限仿真达到一个 PSNE”。势函数只在发生严格改善时下降，在无策略变化的轮次保持不变，因此应表述为“单调不增并最终稳定”，不能表述为每一轮都严格下降。
 
@@ -553,13 +555,13 @@ C_{\mathrm{sys}}(\mathbf{s})
 
 | 策略 | `K` | 系统总归一化代价 | 容量违规 |
 |---|---:|---:|---:|
-| LLM 协调最佳响应 | 62 | 208.10 | 0 |
+| LLM 协调最佳响应 | 63 | 211.18 | 0 |
 | All-Local | 0 | 280.60 | 0 |
-| All-Offload | 100 | 71857.53 | 1 |
-| Greedy | 100 | 71857.53 | 1 |
-| Random `p=0.5`，500 次均值 | 49.882 | 183.93 | 0 |
+| All-Offload | 100 | 58463.59 | 1 |
+| Greedy | 100 | 58463.59 | 1 |
+| Random `p=0.5`，500 次均值 | 49.882 | 181.77 | 0 |
 
-随机基线的平均系统总代价 `183.93` 低于本次 PSNE 的 `208.10`，同时随机基线的平均卸载数约为 `49.882`，低于 PSNE 的 `62`。随机分配只是 500 个静态 Bernoulli 策略的数值基线：它不检查节点是否愿意单边改变策略，也不是分布式最佳响应均衡或具有个体理性的调度算法。因此结果支持“协调策略达到 PSNE 并避免主实验容量违规”，但不支持“协调策略的系统总代价优于所有基准”，更不支持“达到全局最优”。
+随机基线的平均系统总代价 `181.77` 低于本次 PSNE 的 `211.18`，同时随机基线的平均卸载数约为 `49.882`，低于 PSNE 的 `63`。随机分配只是 500 个静态 Bernoulli 策略的数值基线：它不检查节点是否愿意单边改变策略，也不是分布式最佳响应均衡或具有个体理性的调度算法。因此结果支持“协调策略达到 PSNE 并避免主实验容量违规”，但不支持“协调策略的系统总代价优于所有基准”，更不支持“达到全局最优”。
 
 #### 指标三：内存硬约束违规率
 
@@ -575,7 +577,7 @@ C_{\mathrm{sys}}(\mathbf{s})
 
 **输出：** `memory_violation_sweep.csv` 和图 `04_memory_violation_rate`。
 
-**本次结果：** 在本次 30 次重复的软件容量测试中，最佳响应策略在 `N=30...200` 的违规率均为 0。All-Offload 和 Greedy 从 `N=70` 起违规率为 1；Random 的违规率从 `N=120` 开始上升，并在 `N>=170` 时达到 1。该结果只适用于当前 `16 GB`、`80` 个等效基础槽位、语义倍率和任务样本，不能解释为真实硬件 OOM 保证。
+**本次结果：** 在本次 30 次重复的软件容量测试中，最佳响应策略在 `N=30...200` 的违规率均为 0。All-Offload 和 Greedy 从 `N=80` 起违规率为 1；Random 的违规率从 `N=120` 开始上升，并在 `N>=170` 时达到 1。该结果只适用于当前 `16 GB`、`80` 个等效基础槽位、语义倍率和任务样本，不能解释为真实硬件 OOM 保证。
 
 #### 指标四：LLM 协调开销分析
 
@@ -587,19 +589,20 @@ C_{\mathrm{sys}}(\mathbf{s})
 
 | 指标 | 结果 |
 |---|---:|
-| 复用的任务语义预测 | 200 |
-| 本次语义预测真实 API 调用 | 0 |
-| 逻辑协调次数 | 796 |
-| 本次 Game Master 真实 API 调用 | 248 |
-| 缓存复用 | 548 |
-| 记录 Tokens | 98,478 |
-| 平均 API 时延 | 1397.05 ms |
-| P95 API 时延 | 1861.96 ms |
-| 请求模型 | `deepseek-chat` |
+| 新生成的任务语义预测 | 200 |
+| 本次语义预测真实 API 调用 | 200 |
+| 逻辑协调次数 | 858 |
+| 本次 Game Master 真实 API 调用 | 267 |
+| 缓存复用 | 591 |
+| Game Master 记录 Tokens | 105,911 |
+| 任务语义预测 Tokens | 61,718 |
+| 平均 API 时延 | 1455.19 ms |
+| P95 API 时延 | 1933.32 ms |
+| 请求模型 | `deepseek-v4-flash` |
 | 服务端返回模型 | `deepseek-v4-flash` |
 | LLM 数值与公式不一致 | 0 |
 
-实测 API 时延约为秒级，不是微秒至毫秒级。因此当前结果不能证明 LLM 协调已经满足实时控制要求；它只说明该机制能够在离线软件仿真中完成语义反馈与数值核验。请求使用 `temperature=0`，但这本身不构成模型输出数学确定性的保证；固定输入、持久化缓存和 Python 数值复核共同提供本实验所需的可重复性。
+实测 API 时延约为秒级，不是微秒至毫秒级。因此当前结果不能证明 LLM 协调已经满足实时控制要求；它只说明该机制能够在离线软件仿真中完成语义反馈与数值核验。请求使用 `temperature=0` 和 `thinking=disabled`，但这本身不构成模型输出数学确定性的保证；固定输入、持久化缓存和 Python 数值复核共同提供本实验所需的可重复性。
 
 ## 4 代码、输出与复现
 
@@ -628,7 +631,8 @@ Mark7/
 | `selected_model_B_metrics.csv` | 拥塞函数参数与拟合质量 |
 | `selected_model_B_fit_points.csv` | 每个拟合点的观测、预测与残差 |
 | `semantic_intents.csv` | 200 条结构化任务 Intent |
-| `semantic_resource_predictions_reused.csv` | LLM 语义影响预测记录 |
+| `semantic_resource_predictions.csv` | 本次完整运行新生成的 LLM 语义影响预测记录 |
+| `semantic_generation_manifest.json` | 语义生成模型、API 调用、温度、Intent 哈希和缓存溯源 |
 | `semantic_parameter_calibration.csv` | `q_bar`、`m_bar`、`mu_eff` 和 `v_req_eff` |
 | `model_equilibrium_strategies.csv` | 100 个节点的最终策略 `s*` |
 | `model_convergence_traces.csv` | 每轮 `K`、势函数、总代价和容量状态 |
@@ -663,6 +667,8 @@ export DEEPSEEK_API_KEY=YOUR_KEY
 .venv/bin/python 01_源码与说明/plot_mark7_full_results.py
 ```
 
+`--full` 不读取旧的语义预测或旧的 Game Master 缓存。它会创建带 UTC 运行标识的新缓存文件，重新生成 200 条语义预测，再完成中心协调与博弈计算。实际 API 数、Token 数和时延写入 `semantic_generation_manifest.json`、`llm_coordination_overhead.csv` 和 `run_summary.json`。
+
 不调用 API 的公式与流程核验：
 
 ```bash
@@ -681,6 +687,7 @@ API 密钥只从环境变量读取，不能写入代码、README、CSV、JSON �
 - Prompt 长度是字符数，不是真实 tokenizer Token 数；
 - `16 GB`、`80` 个等效槽位、本地代价系数、传输代价系数和模拟能耗参数包含显式假设；
 - 将任务级语义倍率取均值是为了保留共享拥塞函数和精确势结构，但会损失任务异构性；
+- 只有在执行 `--full` 并生成新的 `semantic_resource_predictions.csv` 后，结果才能称为从阿里任务样本到 LLM 协调的完整运行；
 - Memory Violation Rate 是软件容量代理，不是物理 OOM 实测；
 - LLM API 时延为秒级，当前实验不支持实时部署结论；
 - 本实验是公开匿名轨迹驱动的机制验证，不是生产部署验证。

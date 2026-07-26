@@ -34,7 +34,13 @@ def main() -> None:
     queue_stub = {"card_count_c": queue5["card_count_c"], "mu_card_per_second": queue5["mu_card_per_second"], "lambda_per_task_per_second": 0.0}
     pool = m5.load_request_pool(c)
     _, arrays = m5.build_intents(pool, c)
-    semantic = pd.read_csv(OUT / "semantic_resource_predictions_reused.csv")
+    semantic_path = OUT / "semantic_resource_predictions.csv"
+    if not semantic_path.exists():
+        raise FileNotFoundError(
+            "Run mark7_pdf_cost_experiment.py --full first to generate "
+            "semantic_resource_predictions.csv from the Alibaba task pool."
+        )
+    semantic = pd.read_csv(semantic_path)
     calibration = mk7.semantic_calibration(semantic, c.n_main)
     mu_card_effective = float(selected.mu_card_effective_per_second)
     queue_stub["mu_card_per_second"] = mu_card_effective
@@ -76,6 +82,7 @@ def main() -> None:
     m5.write_csv(OUT / "vram_barrier_fit_points.csv", vram_points.to_dict("records"))
     assumption_rows = m5.assumptions_rows(c, queue5, memory)
     assumption_rows.extend([
+        {"parameter": "llm_thinking_mode", "value": "disabled", "status": "API_configuration"},
         {"parameter": "mean_compute_multiplier", "value": calibration["mean_compute_multiplier"], "status": "DeepSeek prediction mean over 100 tasks"},
         {"parameter": "mean_vram_multiplier", "value": calibration["mean_vram_multiplier"], "status": "DeepSeek prediction mean over 100 tasks"},
         {"parameter": "mu_card_effective", "value": mu_card_effective, "status": "mu_card_data divided by mean_compute_multiplier"},

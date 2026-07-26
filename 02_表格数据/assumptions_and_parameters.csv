@@ -21,17 +21,19 @@ prompt_tx_weight,0.15,configuration
 radio_energy_mj_per_kb_assumed,0.2,explicit_assumption
 request_metadata_kb_assumed,1.0,explicit_assumption
 utf8_bytes_per_char_assumed,2.0,explicit_assumption
-deepseek_model,deepseek-chat,configuration
+deepseek_model,deepseek-v4-flash,configuration
 llm_timeout_seconds,90.0,configuration
 llm_retries,3,configuration
 semantic_api_workers,4,configuration
+llm_max_tokens,512,configuration
 gpu_card_count_c,109,data_derived_median
 queue_mu_card,0.044482996168049134,data_derived_service_rate
 queue_mu_pool,4.848646582317356,derived_c_times_mu_card
 queue_lambda,0.0035446938887847756,fitted_proxy
 memory_alpha,5.8080428055370446,fitted_from_empirical_tail
 memory_beta,11.010905273530017,fitted_from_empirical_tail
-mean_compute_multiplier,1.235,DeepSeek prediction mean over 100 tasks
-mean_vram_multiplier,1.15,DeepSeek prediction mean over 100 tasks
-mu_card_effective,0.0360186203789871,mu_card_data divided by mean_compute_multiplier
-vreq_effective_fraction,0.014374999999999999,base slot fraction multiplied by mean_vram_multiplier
+llm_thinking_mode,disabled,API_configuration
+mean_compute_multiplier,1.199,DeepSeek prediction mean over 100 tasks
+mean_vram_multiplier,1.1349999999999998,DeepSeek prediction mean over 100 tasks
+mu_card_effective,0.03710008020688,mu_card_data divided by mean_compute_multiplier
+vreq_effective_fraction,0.014187499999999997,base slot fraction multiplied by mean_vram_multiplier

@@ -1,2 +1,2 @@
 mean_compute_multiplier,mean_vram_multiplier,mu_card_data_per_second,mu_card_effective_per_second,mu_pool_effective_per_second,vreq_base_fraction,vreq_effective_fraction,aggregation_scope,reason
-1.235,1.15,0.044482996168049134,0.03601862037898715,3.926029621309599,0.0125,0.014374999999999999,first 100 fixed main-game tasks,preserve one shared Dcomp(K) and M(K) for the PDF exact-potential structure
+1.199,1.1349999999999998,0.044482996168049134,0.03710008020688001,4.043908742549921,0.0125,0.014187499999999997,first 100 fixed main-game tasks,preserve one shared Dcomp(K) and M(K) for the PDF exact-potential structure

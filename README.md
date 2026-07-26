@@ -12,27 +12,27 @@
 
 系统由 1 个中心计算池和 `N` 个边缘节点组成，边缘节点集合为：
 
-```math
+$$
 \mathcal{N}=\{1,2,\ldots,N\}
-```
+$$
 
 节点 `i` 的卸载策略为：
 
-```math
+$$
 s_i\in\{0,1\},\qquad
 s_i=0\ \text{表示本地执行},\quad
 s_i=1\ \text{表示卸载到中心池}
-```
+$$
 
 全局策略组合与当前卸载节点数分别为：
 
-```math
+$$
 \mathbf{s}=(s_1,s_2,\ldots,s_N)
-```
+$$
 
-```math
+$$
 K(\mathbf{s})=\sum_{j=1}^{N}s_j
-```
+$$
 
 主实验设置 `N=100`。程序使用固定随机种子 `20260717`，从指定高峰小时的成功请求中抽取 200 条任务，前 100 条用于主博弈，其余任务用于节点规模扩展实验。
 
@@ -56,11 +56,11 @@ Prompt 特征是数据集给出的字符长度，不是真实 tokenizer 生成�
 
 节点 `i` 的总代价由本地或传输代价、中心算力拥塞代价和显存压力惩罚组成：
 
-```math
+$$
 C_i(s_i,\mathbf{s}_{-i})
 =E_i(s_i)
 +s_i\left[D_{\mathrm{comp}}(K(\mathbf{s}))+M(K(\mathbf{s}))\right]
-```
+$$
 
 该结构表示只有选择卸载的节点承担中心拥塞和显存压力代价。本实验没有增加独立的第三项任务计算代价；LLM 的语义预测只校准 `D_comp` 和 `M` 的参数。
 
@@ -68,53 +68,53 @@ C_i(s_i,\mathbf{s}_{-i})
 
 理论模型中的本地与传输代价为：
 
-```math
+$$
 E_i(s_i)
 =(1-s_i)e_{i,\mathrm{loc}}+s_i e_{i,\mathrm{tx}}
-```
+$$
 
 因此两种策略的个体代价分别为：
 
-```math
+$$
 C_i^{\mathrm{loc}}=e_{i,\mathrm{loc}}
-```
+$$
 
-```math
+$$
 C_i^{\mathrm{off}}
 =e_{i,\mathrm{tx}}+D_{\mathrm{comp}}(K)+M(K)
-```
+$$
 
 由于公开轨迹没有直接提供统一的边缘能耗和无线传输能耗，Mark7 先把任务执行时间按样本中位数归一化：
 
-```math
+$$
 x_i=\frac{T_i}{T_{\mathrm{med}}}
-```
+$$
 
 然后实例化本地代价与传输代价：
 
-```math
+$$
 e_{i,\mathrm{loc}}=1.8x_i+0.4
-```
+$$
 
-```math
+$$
 e_{i,\mathrm{tx}}
 =0.15+0.15\min\left(\frac{L_i}{L_{95}},1.5\right)
-```
+$$
 
 其中，`T_i` 是任务执行时间，`T_med` 是样本执行时间中位数，`L_i` 是 Prompt 字符长度，`L_95` 是字符长度的 95 分位数。系数 `1.8`、`0.4`、`0.15` 和 `0.15` 是显式仿真假设，不是 GenTD26 直接给出的物理参数。因此主博弈的总代价是归一化指标，不能解释为焦耳、人民币或完整端到端时延。
 
 结果表另行记录两个辅助模拟能耗指标，它们不参与最佳响应决策：
 
-```math
+$$
 E_i^{\mathrm{loc,sim}}
 =P_{\mathrm{edge}}\times1.8T_i\times1000
-```
+$$
 
-```math
+$$
 E_i^{\mathrm{tx,sim}}
 =e_{\mathrm{radio}}
 \left[1+\frac{2(L_i+L_i^-)}{1024}\right]
-```
+$$
 
 其中 `P_edge=10 W`、`e_radio=0.2 mJ/KB`、固定元数据为 `1 KB`，每字符按 `2 byte` 估算。这些同样是模拟量，不是设备实测能耗。
 
@@ -122,47 +122,47 @@ E_i^{\mathrm{tx,sim}}
 
 理论分析采用以下单服务池拥塞代理：
 
-```math
+$$
 D_{\mathrm{comp}}(K)=\frac{1}{\mu-\lambda K}
-```
+$$
 
 这个基础式用于表达“负载接近服务能力时，拥塞代价非线性上升”的理论结构，不是本次数据拟合所直接采用的标准排队模型。
 
 实际仿真根据多服务容器轨迹，将中心视为理想负载均衡的大算力池，并采用带固定开销与压力缩放的工程拟合模型：
 
-```math
+$$
 D_{\mathrm{comp}}(K)
 =D_{\mathrm{overhead}}
 +\frac{1}{c\mu_{\mathrm{card,eff}}}
 \frac{a}{1-\rho(K)}
-```
+$$
 
-```math
+$$
 \rho(K)=\frac{\lambda K}{c\mu_{\mathrm{card,eff}}}
-```
+$$
 
 上式可等价写为：
 
-```math
+$$
 D_{\mathrm{comp}}(K)
 =D_{\mathrm{overhead}}
 +\frac{a}{c\mu_{\mathrm{card,eff}}-\lambda K}
-```
+$$
 
 因此它保留了 `1/(处理能力-负载)` 的非线性结构，但增加了固定开销 `D_overhead`、池化处理能力 `c*mu_card,eff` 和缩放参数 `a`。当 `D_overhead=0`、`a=1` 且 `mu=c*mu_card,eff` 时，该式在代数形式上退化为基础拥塞代理。它是轨迹驱动的利用率代理模型，不应称为标准 M/M/1 或标准 M/M/c 模型。
 
 数据与语义校准关系为：
 
-```math
+$$
 \mu_{\mathrm{card,data}}
 =\frac{1}{R}\sum_{r=1}^{R}\frac{1000}{T_r^{\mathrm{infer,ms}}}
-```
+$$
 
-```math
+$$
 \bar q=\frac{1}{N}\sum_{i=1}^{N}q_i,\qquad
 \mu_{\mathrm{card,eff}}
 =\frac{\mu_{\mathrm{card,data}}}{\bar q}
-```
+$$
 
 其中 `q_i` 是 LLM 给出的任务相对计算倍率。`c` 取匹配时间点中服务容器数量的中位数；`D_overhead`、`a` 和 `lambda` 通过网关排队观测拟合。
 
@@ -188,53 +188,53 @@ D_{\mathrm{comp}}(K)
 
 显存硬约束采用指数障碍函数。使用物理显存量表示时，其结构为：
 
-```math
+$$
 M(K)=\alpha\exp\left[\beta_{\mathrm{phys}}(Kv_{\mathrm{req}}-V_{\max})\right]
-```
+$$
 
 Mark7 使用无量纲显存负载比例进行计算：
 
-```math
+$$
 M(K)
 =\alpha\exp\left[
 \beta\left(
 K\frac{v_{\mathrm{req,eff}}}{V_{\max}}-1
 \right)
 \right]
-```
+$$
 
 两种写法的结构等价，对应关系为：
 
-```math
+$$
 \beta=\beta_{\mathrm{phys}}V_{\max}
-```
+$$
 
 LLM 显存倍率通过以下关系进入原有障碍函数参数：
 
-```math
+$$
 \bar m=\frac{1}{N}\sum_{i=1}^{N}m_i
-```
+$$
 
-```math
+$$
 \frac{v_{\mathrm{req,eff}}}{V_{\max}}
 =\frac{\bar m}{K_{\mathrm{cap}}}
-```
+$$
 
 本次 `m_bar=1.150`、`V_max=16 GB`、`K_cap=80`，因此单个卸载任务的等效显存比例为 `0.014375`。`V_max` 和 `K_cap` 是显式仿真假设；`alpha=5.808043`、`beta=11.010905` 根据匿名 VRAM 尾部代理拟合。
 
 全局显存负载比例为：
 
-```math
+$$
 V(\mathbf{s})
 =K(\mathbf{s})\frac{v_{\mathrm{req,eff}}}{V_{\max}}
-```
+$$
 
 容量违规指示量为：
 
-```math
+$$
 I_{\mathrm{mem}}(\mathbf{s})
 =\mathbb{I}\left[V(\mathbf{s})>1\right]
-```
+$$
 
 这是一项软件容量代理，不是物理 GPU OOM 实测。
 
@@ -244,16 +244,16 @@ I_{\mathrm{mem}}(\mathbf{s})
 
 如果存在映射：
 
-```math
+$$
 \Phi:\{0,1\}^{N}\rightarrow\mathbb{R}
-```
+$$
 
 使任意节点 `i` 在固定其他节点策略 `s_-i` 时，任意两种策略 `a_i,b_i` 都满足：
 
-```math
+$$
 C_i(a_i,\mathbf{s}_{-i})-C_i(b_i,\mathbf{s}_{-i})
 =\Phi(a_i,\mathbf{s}_{-i})-\Phi(b_i,\mathbf{s}_{-i})
-```
+$$
 
 则该博弈是精确势博弈。
 
@@ -261,26 +261,26 @@ C_i(a_i,\mathbf{s}_{-i})-C_i(b_i,\mathbf{s}_{-i})
 
 定义共享中心代价：
 
-```math
+$$
 G(k)=D_{\mathrm{comp}}(k)+M(k)
-```
+$$
 
 候选势函数为：
 
-```math
+$$
 \Phi(\mathbf{s})
 =\sum_{j=1}^{N}E_j(s_j)
 +\sum_{k=1}^{K(\mathbf{s})}G(k)
-```
+$$
 
 也就是：
 
-```math
+$$
 \Phi(\mathbf{s})
 =\sum_{j=1}^{N}E_j(s_j)
 +\sum_{k=1}^{K(\mathbf{s})}
 \left[D_{\mathrm{comp}}(k)+M(k)\right]
-```
+$$
 
 下面分别证明节点从本地切换到卸载，以及从卸载切换到本地时，个体代价变化都等于势函数变化。
 
@@ -288,26 +288,26 @@ G(k)=D_{\mathrm{comp}}(k)+M(k)
 
 固定其他节点策略，并定义其他节点的卸载数：
 
-```math
+$$
 K_{-i}=\sum_{j\ne i}s_j
-```
+$$
 
 切换前 `s_i=0`，全局卸载数为 `K_-i`，节点 `i` 的代价为：
 
-```math
+$$
 C_i(0,\mathbf{s}_{-i})=e_{i,\mathrm{loc}}
-```
+$$
 
 切换后 `s_i=1`，全局卸载数为 `K_-i+1`，节点 `i` 的代价为：
 
-```math
+$$
 C_i(1,\mathbf{s}_{-i})
 =e_{i,\mathrm{tx}}+G(K_{-i}+1)
-```
+$$
 
 因此节点个体代价变化为：
 
-```math
+$$
 \begin{aligned}
 \Delta C_i^{0\rightarrow1}
 &=C_i(1,\mathbf{s}_{-i})-C_i(0,\mathbf{s}_{-i})\\
@@ -315,11 +315,11 @@ C_i(1,\mathbf{s}_{-i})
 &=e_{i,\mathrm{tx}}-e_{i,\mathrm{loc}}
 +D_{\mathrm{comp}}(K_{-i}+1)+M(K_{-i}+1).
 \end{aligned}
-```
+$$
 
 势函数变化为：
 
-```math
+$$
 \begin{aligned}
 \Delta\Phi^{0\rightarrow1}
 &=\Phi(1,\mathbf{s}_{-i})-\Phi(0,\mathbf{s}_{-i})\\
@@ -328,23 +328,23 @@ C_i(1,\mathbf{s}_{-i})
 &=e_{i,\mathrm{tx}}-e_{i,\mathrm{loc}}+G(K_{-i}+1)\\
 &=\Delta C_i^{0\rightarrow1}.
 \end{aligned}
-```
+$$
 
 #### 证明二：节点 `i` 从 `1` 切换为 `0`
 
 切换前 `s_i=1`，全局卸载数为 `K_-i+1`；切换后 `s_i=0`，全局卸载数为 `K_-i`。节点个体代价变化为：
 
-```math
+$$
 \begin{aligned}
 \Delta C_i^{1\rightarrow0}
 &=C_i(0,\mathbf{s}_{-i})-C_i(1,\mathbf{s}_{-i})\\
 &=e_{i,\mathrm{loc}}-e_{i,\mathrm{tx}}-G(K_{-i}+1).
 \end{aligned}
-```
+$$
 
 势函数变化为：
 
-```math
+$$
 \begin{aligned}
 \Delta\Phi^{1\rightarrow0}
 &=\Phi(0,\mathbf{s}_{-i})-\Phi(1,\mathbf{s}_{-i})\\
@@ -353,13 +353,13 @@ C_i(1,\mathbf{s}_{-i})
 &=e_{i,\mathrm{loc}}-e_{i,\mathrm{tx}}-G(K_{-i}+1)\\
 &=\Delta C_i^{1\rightarrow0}.
 \end{aligned}
-```
+$$
 
 两个方向都满足：
 
-```math
+$$
 \Delta C_i=\Delta\Phi
-```
+$$
 
 因此，本实验定义的二元卸载博弈是精确势博弈。
 
@@ -367,27 +367,27 @@ C_i(1,\mathbf{s}_{-i})
 
 当节点执行严格改善自身代价的最佳响应时：
 
-```math
+$$
 \Delta C_i<0
 \quad\Longrightarrow\quad
 \Delta\Phi<0
-```
+$$
 
 系统只有 `2^N` 个有限策略状态，所以势函数不可能沿严格改善路径无限下降或循环。严格改善过程最终会停在不存在有利单边偏离的状态，即纯策略纳什均衡：
 
-```math
+$$
 s_i^*\in\mathrm{BR}_i(\mathbf{s}_{-i}^*),
 \qquad \forall i\in\mathcal{N}
-```
+$$
 
 程序采用确定性平局规则：仅当卸载代价严格更低时选择卸载，否则选择本地。因此实际轨迹中的势函数是单调不增；抽到已经处于最佳响应的节点时，势函数会保持不变，并非每一轮都严格下降。
 
 为核验数学式与代码实现一致，程序随机生成 200 个状态和单节点翻转，检查两个方向的 `Delta C_i=Delta Phi`。本次最大绝对误差为：
 
-```math
+$$
 \max|\Delta C_i-\Delta\Phi|
 =5.28\times10^{-14}<10^{-9}
-```
+$$
 
 该结果验证的是公式实现一致性，不证明参数具有物理真实性，也不证明得到的 PSNE 是系统总代价的全局最小值。
 
@@ -421,10 +421,10 @@ DeepSeek 语义解析器针对每个任务返回：
 
 为了使全部节点共享同一个 `D_comp(K)` 和 `M(K)`，从而保持上面的精确势结构，主实验对 100 条任务预测取算术平均：
 
-```math
+$$
 \bar q=\frac{1}{N}\sum_{i=1}^{N}q_i,\qquad
 \bar m=\frac{1}{N}\sum_{i=1}^{N}m_i
-```
+$$
 
 完整运行时，程序用固定种子从阿里任务池构造 200 条 Intent，并以带 UTC 运行标识的缓存文件调用 `deepseek-v4-flash`。由于本实验只需要结构化数值反馈，API 请求显式设置 `thinking=disabled`，并使用 `max_tokens=512`，避免无关推理耗尽输出预算。每条语义预测同时保存任务 `intent_hash`、请求模型、服务端实际模型、时延、Token 数、解析状态和缓存状态到 `semantic_resource_predictions.csv`；`semantic_generation_manifest.json` 记录任务数、API 调用数、模型、温度、思考模式、Token 上限、Intent 哈希和缓存文件名。
 
@@ -445,10 +445,10 @@ DeepSeek 语义解析器针对每个任务返回：
 
 假设节点 `i` 暂时设为本地执行，其他节点形成 `s_-i`。若节点 `i` 改为卸载，中心代价为：
 
-```math
+$$
 \Delta_i^{\mathrm{center}}
 =D_{\mathrm{comp}}(K_{-i}+1)+M(K_{-i}+1)
-```
+$$
 
 Python 预先提供 `D_comp` 与 `M` 的公式分项，并始终重新计算上述结果。LLM 根据拥塞状态、Intent 和这些分项返回中心代价、算力影响、显存影响和语义警告；返回数值只有在容差内与确定性结果一致时才被标记为一致，节点实际使用的是 Python 核验值，不是未经约束的自然语言输出。因此这里实现的是受公式约束的 LLM Game Master，而不是让 LLM 独立估算未知的中心代价函数。
 
@@ -517,33 +517,33 @@ Python 预先提供 `D_comp` 与 `M` 的公式分项，并始终重新计算上�
 
 系统总代价按全部节点个体代价求和：
 
-```math
+$$
 C_{\mathrm{sys}}(\mathbf{s})
 =\sum_{i=1}^{N}C_i(s_i,\mathbf{s}_{-i})
-```
+$$
 
 对当前二元共享拥塞模型，它也可以写成：
 
-```math
+$$
 C_{\mathrm{sys}}(\mathbf{s})
 =\sum_{i=1}^{N}E_i(s_i)
 +K(\mathbf{s})\left[D_{\mathrm{comp}}(K(\mathbf{s}))+M(K(\mathbf{s}))\right]
-```
+$$
 
 注意 `C_sys` 与势函数 `Phi` 不是同一个量。势函数用于证明单边最佳响应收敛，系统总代价用于比较策略整体表现。
 
 平均模拟能耗与全节点平均排队时延分别为：
 
-```math
+$$
 \bar E_{\mathrm{sim}}
 =\frac{1}{N}\sum_{i=1}^{N}
 \left[(1-s_i)E_i^{\mathrm{loc,sim}}+s_iE_i^{\mathrm{tx,sim}}\right]
-```
+$$
 
-```math
+$$
 \bar D_{\mathrm{all}}
 =\frac{K(\mathbf{s})}{N}D_{\mathrm{comp}}(K(\mathbf{s}))
-```
+$$
 
 **测试方法：** 比较主算法与四类基准的 `C_sys`、平均模拟能耗、排队时延和容量状态；另按本地与传输代价差构造 `K=0...N` 的候选策略，报告能耗 - 时延候选前沿。该前沿是结构化候选集上的前沿，不是对全部 `2^N` 个策略的穷举。
 
@@ -565,11 +565,11 @@ C_{\mathrm{sys}}(\mathbf{s})
 
 对每种节点规模与算法重复 `R=30` 次，模拟内存违规率定义为：
 
-```math
+$$
 \mathrm{MVR}(N)
 =\frac{1}{R}\sum_{r=1}^{R}
 \mathbb{I}\left[V(\mathbf{s}^{(r)})>1\right]
-```
+$$
 
 **测试方法：** 将节点数从 `N=30` 增加到 `N=200`，步长为 10，分别统计主算法和四类基准的容量违规率。
 

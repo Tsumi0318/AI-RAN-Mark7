@@ -151,6 +151,8 @@ $$
 
 因此它保留了 `1/(处理能力-负载)` 的非线性结构，但增加了固定开销 `D_overhead`、池化处理能力 `c*mu_card,eff` 和缩放参数 `a`。当 `D_overhead=0`、`a=1` 且 `mu=c*mu_card,eff` 时，该式在代数形式上退化为基础拥塞代理。它是轨迹驱动的利用率代理模型，不应称为标准 M/M/1 或标准 M/M/c 模型。
 
+本实验实际使用的模型名称为：**池化利用率拥塞代理模型**（`pooled_utilization_proxy`）。模型参数由本次实验的当前队列观测和当前语义校准结果计算得到。
+
 数据与语义校准关系为：
 
 $$
@@ -220,7 +222,7 @@ $$
 =\frac{\bar m}{K_{\mathrm{cap}}}
 $$
 
-本次 `m_bar=1.150`、`V_max=16 GB`、`K_cap=80`，因此单个卸载任务的等效显存比例为 `0.014375`。`V_max` 和 `K_cap` 是显式仿真假设；`alpha=5.808043`、`beta=11.010905` 根据匿名 VRAM 尾部代理拟合。
+本次 `m_bar=1.135`、`V_max=16 GB`、`K_cap=80`，因此单个卸载任务的等效显存比例为 `0.0141875`。`V_max` 和 `K_cap` 是显式仿真假设；`alpha=5.808043`、`beta=11.010905` 根据匿名 VRAM 尾部代理拟合。
 
 全局显存负载比例为：
 
@@ -626,8 +628,8 @@ Mark7/
 
 | 文件 | 内容 |
 |---|---|
-| `selected_model_B_metrics.csv` | 拥塞函数参数与拟合质量 |
-| `selected_model_B_fit_points.csv` | 每个拟合点的观测、预测与残差 |
+| `queue_model_metrics.csv` | 池化利用率拥塞代理模型的参数与拟合质量 |
+| `queue_model_fit_points.csv` | 每个拟合点的观测、预测与残差 |
 | `semantic_intents.csv` | 200 条结构化任务 Intent |
 | `semantic_resource_predictions.csv` | 本次完整运行新生成的 LLM 语义影响预测记录 |
 | `semantic_generation_manifest.json` | 语义生成模型、API 调用、温度、Intent 哈希和缓存溯源 |
@@ -685,6 +687,9 @@ API 密钥只从环境变量读取，不能写入代码、README、CSV、JSON �
 - Prompt 长度是字符数，不是真实 tokenizer Token 数；
 - `16 GB`、`80` 个等效槽位、本地代价系数、传输代价系数和模拟能耗参数包含显式假设；
 - 将任务级语义倍率取均值是为了保留共享拥塞函数和精确势结构，但会损失任务异构性；
+- 当前没有无 LLM、固定倍率和任务级倍率的消融实验，因此不能单独归因 LLM 对卸载结果的增益；
+- 主结果使用固定任务池和固定随机种子的一次运行，没有多时间窗口、多随机种子置信区间；
+- Game Master 的 858 次逻辑协调中有 267 次真实 API 调用、591 次缓存命中，不能表述为每次协调都实时调用 LLM；
 - 只有在执行 `--full` 并生成新的 `semantic_resource_predictions.csv` 后，结果才能称为从阿里任务样本到 LLM 协调的完整运行；
 - Memory Violation Rate 是软件容量代理，不是物理 OOM 实测；
 - LLM API 时延为秒级，当前实验不支持实时部署结论；

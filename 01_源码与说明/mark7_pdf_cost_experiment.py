@@ -69,7 +69,7 @@ def fit_models(points: pd.DataFrame, mu_pool: float) -> tuple[dict[str, Any], pd
 
     fit_b = least_squares(lambda z: np.log(pred_b(z)) - np.log(y), [0.0, 1.0, 0.003], bounds=([0.0, 0.0, 0.0], [10.0, 100.0, 0.2]), loss="soft_l1")
     models = {
-        "B_utilization_proxy": {
+        "pooled_utilization_proxy": {
             "formula": "D=D_overhead+(1/(c*mu_card))*scale/(1-rho), rho=lambda*K/(c*mu_card)",
             "D_overhead_seconds": float(fit_b.x[0]),
             "scale": float(fit_b.x[1]),
@@ -92,7 +92,7 @@ def fit_models(points: pd.DataFrame, mu_pool: float) -> tuple[dict[str, Any], pd
     return models, pd.DataFrame(rows)
 
 
-class ModelB:
+class PooledUtilizationModel:
     def __init__(self, overhead, scale, lam, mu_pool): self.overhead, self.scale, self.lam, self.mu_pool = overhead, scale, lam, mu_pool
     def __call__(self, k):
         if k <= 0: return 0.0
@@ -321,8 +321,8 @@ def main() -> None:
             "cost_structure": "PDF: E_i plus s_i times shared Dcomp(K) and M(K); no independent C_compute",
             "semantic_aggregation": "arithmetic mean over the 100 fixed main-game tasks",
         })
-    write_csv(OUT / "selected_model_B_fit_points.csv", fit_df.to_dict("records"))
-    write_csv(OUT / "selected_model_B_metrics.csv", [{"model": k, **{a: b for a, b in v.items() if a != "prediction"}} for k, v in models.items()])
+    write_csv(OUT / "queue_model_fit_points.csv", fit_df.to_dict("records"))
+    write_csv(OUT / "queue_model_metrics.csv", [{"model": k, **{a: b for a, b in v.items() if a != "prediction"}} for k, v in models.items()])
     write_csv(OUT / "semantic_parameter_calibration.csv", [{
         **calibration,
         "mu_card_data_per_second": float(q5["mu_card_per_second"]),
@@ -335,10 +335,10 @@ def main() -> None:
     }])
 
     base_q = {"card_count_c": q5["card_count_c"], "mu_card_per_second": mu_card_effective, "lambda_per_task_per_second": 0.0}
-    gb = models["B_utilization_proxy"]
+    gb = models["pooled_utilization_proxy"]
     metrics, strategies, traces = [], [], []
     game_cache_path = OUT / f"deepseek_game_master_cache_mark7_{run_id}.json" if args.full else None
-    met, st, tr, events, overhead = run_game(m5, c, arrays, intents, semantic, base_q, "B_utilization_proxy_pdf_cost", ModelB(gb["D_overhead_seconds"], gb["scale"], gb["lambda"], mu_pool_effective), calibration, live=args.full, game_cache_path=game_cache_path)
+    met, st, tr, events, overhead = run_game(m5, c, arrays, intents, semantic, base_q, "pooled_utilization_proxy_pdf_cost", PooledUtilizationModel(gb["D_overhead_seconds"], gb["scale"], gb["lambda"], mu_pool_effective), calibration, live=args.full, game_cache_path=game_cache_path)
     metrics.append(met); strategies.append(st); traces.append(tr)
     write_csv(OUT / "model_game_metrics.csv", metrics)
     pd.concat(strategies, ignore_index=True).to_csv(OUT / "model_equilibrium_strategies.csv", index=False)
@@ -347,8 +347,13 @@ def main() -> None:
     overhead_name = "llm_coordination_overhead.csv" if args.full else "deterministic_coordination_overhead.csv"
     events.to_csv(OUT / event_name, index=False)
     write_csv(OUT / overhead_name, [overhead])
-    selected = "B_utilization_proxy"
-    (OUT / "selected_model.json").write_text(json.dumps({"selected_model": selected, "selection_rule": "scheme B retained from the preceding model comparison", "reason": "Mark7 changes the cost integration, not the previously selected queue family"}, ensure_ascii=False, indent=2), encoding="utf-8")
+    selected = "pooled_utilization_proxy"
+    (OUT / "selected_model.json").write_text(json.dumps({
+        "model": selected,
+        "formula": "D_overhead + (1 / (c * mu_card_eff)) * a / (1 - lambda*K/(c*mu_card_eff))",
+        "selection_rule": "pre-specified model for this experiment",
+        "parameter_source": "current queue observations and current semantic calibration"
+    }, ensure_ascii=False, indent=2), encoding="utf-8")
     summary = {"status":"completed", "experiment":"Mark7 independent end-to-end semantic-to-game run" if args.full else "Mark7 PDF cost structure deterministic run", "run_id": run_id, "selected_model": selected, "semantic_generation": semantic_manifest, "semantic_parameter_calibration":calibration, "models":models, "game_metrics":metrics, "llm_overhead":overhead, "claim_boundary":"Finite-game PSNE verification; not global optimum or deployment validation."}
     summary_name = "run_summary.json" if args.full else "deterministic_run_summary.json"
     (OUT / summary_name).write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")

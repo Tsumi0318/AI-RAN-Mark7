@@ -401,7 +401,7 @@ class SemanticIntentParser:
 
 
 class FormulaModel:
-    """PDF-compatible shared-cost model used as the base for scheme B."""
+    """PDF-compatible shared-cost model used as the pooled utilization proxy."""
     def __init__(
         self,
         c: Config,

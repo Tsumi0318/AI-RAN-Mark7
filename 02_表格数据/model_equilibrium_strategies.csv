@@ -3,11 +3,11 @@ B_utilization_proxy_pdf_cost,0,1,offload
 B_utilization_proxy_pdf_cost,1,0,local
 B_utilization_proxy_pdf_cost,2,0,local
 B_utilization_proxy_pdf_cost,3,1,offload
-B_utilization_proxy_pdf_cost,4,0,local
+B_utilization_proxy_pdf_cost,4,1,offload
 B_utilization_proxy_pdf_cost,5,1,offload
 B_utilization_proxy_pdf_cost,6,1,offload
 B_utilization_proxy_pdf_cost,7,1,offload
-B_utilization_proxy_pdf_cost,8,1,offload
+B_utilization_proxy_pdf_cost,8,0,local
 B_utilization_proxy_pdf_cost,9,0,local
 B_utilization_proxy_pdf_cost,10,1,offload
 B_utilization_proxy_pdf_cost,11,1,offload
@@ -23,7 +23,7 @@ B_utilization_proxy_pdf_cost,20,1,offload
 B_utilization_proxy_pdf_cost,21,1,offload
 B_utilization_proxy_pdf_cost,22,1,offload
 B_utilization_proxy_pdf_cost,23,0,local
-B_utilization_proxy_pdf_cost,24,0,local
+B_utilization_proxy_pdf_cost,24,1,offload
 B_utilization_proxy_pdf_cost,25,1,offload
 B_utilization_proxy_pdf_cost,26,0,local
 B_utilization_proxy_pdf_cost,27,1,offload
@@ -79,11 +79,11 @@ B_utilization_proxy_pdf_cost,76,1,offload
 B_utilization_proxy_pdf_cost,77,0,local
 B_utilization_proxy_pdf_cost,78,0,local
 B_utilization_proxy_pdf_cost,79,1,offload
-B_utilization_proxy_pdf_cost,80,1,offload
+B_utilization_proxy_pdf_cost,80,0,local
 B_utilization_proxy_pdf_cost,81,1,offload
 B_utilization_proxy_pdf_cost,82,1,offload
 B_utilization_proxy_pdf_cost,83,1,offload
-B_utilization_proxy_pdf_cost,84,0,local
+B_utilization_proxy_pdf_cost,84,1,offload
 B_utilization_proxy_pdf_cost,85,1,offload
 B_utilization_proxy_pdf_cost,86,0,local
 B_utilization_proxy_pdf_cost,87,0,local

@@ -1,19 +1,22 @@
 #!/usr/bin/env python3
-"""Mark7: PDF cost structure with semantic-calibrated LLM coordination.
+"""Mark7: PDF cost structure with an independent semantic-to-game run.
 
-The task-level semantic predictions are reused because the tasks are unchanged.
-With --full, the DeepSeek Game Master is called again for every new game state
-because the effective D_comp and M parameters have changed.
+With --full, this entry point starts from the fixed Alibaba task sample, generates
+task-level semantic predictions, then runs the DeepSeek Game Master and the
+deterministic Python best-response verifier. Each run writes a run-specific cache.
 """
 
 from __future__ import annotations
 
 import csv
 import argparse
+import hashlib
 import importlib.util
 import json
 import math
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -156,14 +159,88 @@ def build_pdf_cost_model(m5, c, arrays, semantic, queue, memory, scheduler, n, d
     return PdfCostModel()
 
 
-def run_game(m5, queue_params: dict[str, Any], model_name: str, dcomp, calibration: dict[str, float], live: bool) -> tuple[dict[str, Any], pd.DataFrame, pd.DataFrame, pd.DataFrame, dict[str, Any]]:
-    c = m5.Config()
-    pool = m5.load_request_pool(c)
-    intents, arrays = m5.build_intents(pool, c)
-    semantic_path = OUT / "semantic_resource_predictions_reused.csv"
-    if not semantic_path.exists():
-        raise FileNotFoundError(f"Missing recorded semantic predictions: {semantic_path}")
-    semantic = pd.read_csv(semantic_path)
+def intent_hash(intent: dict[str, Any]) -> str:
+    payload = json.dumps(intent, sort_keys=True, ensure_ascii=False).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
+def display_path(path: Path) -> str:
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
+def sha256_path(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def generate_semantic_predictions(m5, c, intents: list[dict[str, Any]], run_id: str) -> tuple[pd.DataFrame, dict[str, Any]]:
+    """Generate a fresh semantic artifact for every task in the fixed pool."""
+    client = m5.DeepSeekClient(c)
+    cache_path = OUT / f"deepseek_semantic_cache_mark7_{run_id}.json"
+    parser = m5.SemanticIntentParser(client, cache_path)
+    rows: list[dict[str, Any]] = []
+
+    def evaluate(intent: dict[str, Any]) -> dict[str, Any]:
+        result = parser.evaluate(intent)
+        return {"intent_hash": intent_hash(intent), **result}
+
+    with ThreadPoolExecutor(max_workers=c.semantic_api_workers) as executor:
+        futures = {executor.submit(evaluate, intent): intent["node"] for intent in intents}
+        for future in as_completed(futures):
+            rows.append(future.result())
+    rows.sort(key=lambda row: int(row["node"]))
+    semantic = pd.DataFrame(rows)
+    semantic_path = OUT / "semantic_resource_predictions.csv"
+    semantic.to_csv(semantic_path, index=False)
+    resolved = sorted({str(value) for value in semantic["resolved_model"].dropna()})
+    cache_hits = int(semantic["cache_hit"].fillna(False).astype(bool).sum())
+    manifest = {
+        "stage": "fresh_task_semantic_prediction",
+        "run_id": run_id,
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+        "source": "Alibaba GenTD26 fixed task pool",
+        "task_count": len(semantic),
+        "requested_model": client.model,
+        "resolved_models": resolved,
+        "real_api_calls_this_run": int(len(semantic) - cache_hits),
+        "cache_hits_this_run": cache_hits,
+        "api_attempts_total": int(semantic["attempts"].fillna(0).sum()),
+        "temperature": 0,
+        "max_tokens": c.llm_max_tokens,
+        "thinking": "disabled",
+        "intent_hashes": {str(int(row["node"])): row["intent_hash"] for row in rows},
+        "output_file": display_path(semantic_path),
+        "output_sha256": sha256_path(semantic_path),
+        "intent_input_file": display_path(OUT / "semantic_intents.csv"),
+        "intent_input_sha256": sha256_path(OUT / "semantic_intents.csv"),
+        "cache_file": display_path(cache_path),
+        "cache_sha256": sha256_path(cache_path),
+        "api_key_saved": False,
+    }
+    (OUT / "semantic_generation_manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+    return semantic, manifest
+
+
+def validate_semantic_artifact(semantic: pd.DataFrame, intents: list[dict[str, Any]]) -> None:
+    expected = {int(intent["node"]): intent_hash(intent) for intent in intents}
+    if len(semantic) != len(expected):
+        raise ValueError(f"Semantic artifact has {len(semantic)} rows; expected {len(expected)}")
+    observed_nodes = {int(value) for value in semantic["node"]}
+    if observed_nodes != set(expected):
+        raise ValueError("Semantic artifact node IDs do not match the current Intent pool")
+    if "intent_hash" in semantic:
+        mismatches = [node for node, expected_hash in expected.items() if str(semantic.loc[semantic.node == node, "intent_hash"].iloc[0]) != expected_hash]
+        if mismatches:
+            raise ValueError(f"Semantic artifact Intent hash mismatch for nodes: {mismatches[:5]}")
+
+
+def run_game(m5, c, arrays, intents, semantic: pd.DataFrame, queue_params: dict[str, Any], model_name: str, dcomp, calibration: dict[str, float], live: bool, game_cache_path: Path | None = None) -> tuple[dict[str, Any], pd.DataFrame, pd.DataFrame, pd.DataFrame, dict[str, Any]]:
     memory, _ = m5.fit_vram_barrier(c)
     scheduler = m5.scheduler_summary()
     queue = dict(queue_params)
@@ -171,7 +248,9 @@ def run_game(m5, queue_params: dict[str, Any], model_name: str, dcomp, calibrati
     base = build_pdf_cost_model(m5, c, arrays, semantic, queue, memory, scheduler, c.n_main, dcomp, calibration)
     if live:
         client = m5.DeepSeekClient(c)
-        coordinator = m5.DeepSeekGameMaster(client, base, OUT / "deepseek_game_master_cache_mark7.json")
+        if game_cache_path is None:
+            raise ValueError("A unique Game Master cache path is required for a full run")
+        coordinator = m5.DeepSeekGameMaster(client, base, game_cache_path)
         eq, trace = m5.run_best_response(base, c, c.seed, intents=intents[:c.n_main], coordinator=coordinator, record_trace=True)
         events = pd.DataFrame(coordinator.events)
         new_events = events.loc[events.persistent_cache_hit == 0].drop_duplicates("state_hash")
@@ -181,8 +260,7 @@ def run_game(m5, queue_params: dict[str, Any], model_name: str, dcomp, calibrati
             "mode": "live_deepseek_game_master",
             "requested_model": client.model,
             "resolved_models": ";".join(sorted(set(recorded_api.resolved_model.dropna().astype(str)))),
-            "semantic_predictions_reused": len(semantic),
-            "semantic_real_api_calls_this_run": 0,
+            "semantic_predictions_generated": len(semantic),
             "game_logical_calls": len(events),
             "game_real_api_calls_this_run": len(new_events),
             "game_cache_hits": int(events.persistent_cache_hit.sum()),
@@ -196,7 +274,7 @@ def run_game(m5, queue_params: dict[str, Any], model_name: str, dcomp, calibrati
     else:
         eq, trace = m5.run_best_response(base, c, c.seed, record_trace=True)
         events = pd.DataFrame([{"mode": "deterministic_no_live_llm"}])
-        overhead = {"mode": "deterministic_no_live_llm", "semantic_predictions_reused": len(semantic), "game_logical_calls": 0, "game_real_api_calls_this_run": 0, "total_tokens_this_run": 0, "api_key_saved": False}
+        overhead = {"mode": "deterministic_no_live_llm", "semantic_predictions_loaded": len(semantic), "game_logical_calls": 0, "game_real_api_calls_this_run": 0, "total_tokens_this_run": 0, "api_key_saved": False}
     metrics = base.metrics(eq)
     metrics.update({"model": model_name, "updates": len(trace)-1, "strategy_changes": sum(int(r["changed"]) for r in trace), "verified_psne": int(base.is_psne(eq))})
     strategy = [{"model": model_name, "node": i, "s_star": int(eq[i]), "meaning": "offload" if eq[i] else "local"} for i in range(c.n_main)]
@@ -207,14 +285,29 @@ def run_game(m5, queue_params: dict[str, Any], model_name: str, dcomp, calibrati
 def main() -> None:
     parser = argparse.ArgumentParser()
     mode = parser.add_mutually_exclusive_group(required=True)
-    mode.add_argument("--full", action="store_true", help="Run the live DeepSeek Game Master with the selected model")
+    mode.add_argument("--full", action="store_true", help="Generate fresh semantic predictions and run the live DeepSeek Game Master")
     mode.add_argument("--deterministic", action="store_true", help="Run without live API calls for local verification")
     args = parser.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
     m5 = load_base_module()
-    q5, points = m5.fit_multigpu_delay(m5.Config())
-    semantic = pd.read_csv(OUT / "semantic_resource_predictions_reused.csv")
-    calibration = semantic_calibration(semantic, m5.Config().n_main)
+    c = m5.Config()
+    run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    pool = m5.load_request_pool(c)
+    intents, arrays = m5.build_intents(pool, c)
+    write_csv(OUT / "semantic_intents.csv", intents)
+    if args.full:
+        semantic, semantic_manifest = generate_semantic_predictions(m5, c, intents, run_id)
+    else:
+        semantic_path = OUT / "semantic_resource_predictions.csv"
+        if not semantic_path.exists():
+            raise FileNotFoundError(
+                "semantic_resource_predictions.csv is missing; run --full before --deterministic"
+            )
+        semantic = pd.read_csv(semantic_path)
+        semantic_manifest = {"stage": "loaded_semantic_artifact", "output_file": display_path(semantic_path), "task_count": len(semantic)}
+    validate_semantic_artifact(semantic, intents)
+    calibration = semantic_calibration(semantic, c.n_main)
+    q5, points = m5.fit_multigpu_delay(c)
     mu_card_effective = float(q5["mu_card_per_second"]) / calibration["mean_compute_multiplier"]
     mu_pool_effective = float(q5["card_count_c"]) * mu_card_effective
     models, fit_df = fit_models(points, mu_pool_effective)
@@ -244,7 +337,8 @@ def main() -> None:
     base_q = {"card_count_c": q5["card_count_c"], "mu_card_per_second": mu_card_effective, "lambda_per_task_per_second": 0.0}
     gb = models["B_utilization_proxy"]
     metrics, strategies, traces = [], [], []
-    met, st, tr, events, overhead = run_game(m5, base_q, "B_utilization_proxy_pdf_cost", ModelB(gb["D_overhead_seconds"], gb["scale"], gb["lambda"], mu_pool_effective), calibration, live=args.full)
+    game_cache_path = OUT / f"deepseek_game_master_cache_mark7_{run_id}.json" if args.full else None
+    met, st, tr, events, overhead = run_game(m5, c, arrays, intents, semantic, base_q, "B_utilization_proxy_pdf_cost", ModelB(gb["D_overhead_seconds"], gb["scale"], gb["lambda"], mu_pool_effective), calibration, live=args.full, game_cache_path=game_cache_path)
     metrics.append(met); strategies.append(st); traces.append(tr)
     write_csv(OUT / "model_game_metrics.csv", metrics)
     pd.concat(strategies, ignore_index=True).to_csv(OUT / "model_equilibrium_strategies.csv", index=False)
@@ -253,12 +347,9 @@ def main() -> None:
     overhead_name = "llm_coordination_overhead.csv" if args.full else "deterministic_coordination_overhead.csv"
     events.to_csv(OUT / event_name, index=False)
     write_csv(OUT / overhead_name, [overhead])
-    pool = m5.load_request_pool(m5.Config())
-    intents, _ = m5.build_intents(pool, m5.Config())
-    write_csv(OUT / "semantic_intents.csv", intents)
     selected = "B_utilization_proxy"
     (OUT / "selected_model.json").write_text(json.dumps({"selected_model": selected, "selection_rule": "scheme B retained from the preceding model comparison", "reason": "Mark7 changes the cost integration, not the previously selected queue family"}, ensure_ascii=False, indent=2), encoding="utf-8")
-    summary = {"status":"completed", "experiment":"Mark7 PDF cost structure with semantic-calibrated utilization-proxy queue and live DeepSeek Game Master" if args.full else "Mark7 PDF cost structure deterministic run", "selected_model": selected, "semantic_parameter_calibration":calibration, "models":models, "game_metrics":metrics, "llm_overhead":overhead, "claim_boundary":"Finite-game PSNE verification; not global optimum or deployment validation."}
+    summary = {"status":"completed", "experiment":"Mark7 independent end-to-end semantic-to-game run" if args.full else "Mark7 PDF cost structure deterministic run", "run_id": run_id, "selected_model": selected, "semantic_generation": semantic_manifest, "semantic_parameter_calibration":calibration, "models":models, "game_metrics":metrics, "llm_overhead":overhead, "claim_boundary":"Finite-game PSNE verification; not global optimum or deployment validation."}
     summary_name = "run_summary.json" if args.full else "deterministic_run_summary.json"
     (OUT / summary_name).write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(summary, ensure_ascii=False, indent=2))

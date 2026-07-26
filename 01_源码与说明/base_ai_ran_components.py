@@ -55,11 +55,10 @@ class Config:
     radio_energy_mj_per_kb_assumed: float = 0.2
     request_metadata_kb_assumed: float = 1.0
     utf8_bytes_per_char_assumed: float = 2.0
-    deepseek_model: str = "deepseek-v4-flash"
+    deepseek_model: str = "deepseek-chat"
     llm_timeout_seconds: float = 90.0
     llm_retries: int = 3
     semantic_api_workers: int = 4
-    llm_max_tokens: int = 512
 
 
 def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
@@ -337,7 +336,6 @@ class DeepSeekClient:
                     temperature=0,
                     max_tokens=max_tokens,
                     response_format={"type": "json_object"},
-                    extra_body={"thinking": {"type": "disabled"}},
                 )
                 latency_ms = (time.perf_counter() - started) * 1000.0
                 parsed = self.parse_json(response.choices[0].message.content or "")
@@ -378,7 +376,7 @@ class SemanticIntentParser:
             "compute_multiplier, vram_multiplier, risk_level, semantic_warning. Multipliers must be numbers "
             "from 0.5 to 2.5. Do not decide local/offload."
         )
-        response = self.client.complete_json(system, intent, max_tokens=self.client.c.llm_max_tokens)
+        response = self.client.complete_json(system, intent, max_tokens=180)
         raw = response.pop("parsed")
         risk = str(raw.get("risk_level", "medium")).lower()
         if risk not in {"low", "medium", "high"}:
@@ -537,7 +535,7 @@ class DeepSeekGameMaster:
                 "vram_impact, semantic_warning. center_cost_increment must equal the sum of all supplied numeric "
                 "formula components. Do not choose the node strategy."
             )
-            response = self.client.complete_json(system, payload, max_tokens=self.client.c.llm_max_tokens)
+            response = self.client.complete_json(system, payload, max_tokens=180)
             raw = response.pop("parsed")
             result = {
                 "llm_center_cost_raw": safe_float(raw.get("center_cost_increment"), exact["center_cost_increment"]),

@@ -1,0 +1,2 @@
+mode,semantic_predictions_reused,game_logical_calls,game_real_api_calls_this_run,total_tokens_this_run,api_key_saved
+deterministic_no_live_llm,200,0,0,0,False

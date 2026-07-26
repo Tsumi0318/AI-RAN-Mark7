@@ -1,2 +1,2 @@
 k_offload,offload_fraction,potential,system_total_cost_normalized,mean_energy_mj_per_task_simulated,queue_delay_ms_per_offloaded_task,mean_queue_delay_ms_per_task,vram_load_gb_simulated,vram_load_fraction,memory_violation_simulated,is_psne,model,updates,strategy_changes,verified_psne
-63,0.63,110.0005433317764,211.181442301592,96480.1434765625,212.79529451408243,134.06103554387195,14.300999999999997,0.8938124999999998,0,1,B_utilization_proxy_pdf_cost,858,70,1
+62,0.62,111.33833322026905,208.0965767156499,99720.14136328125,212.79245610952057,131.93132278790276,14.259999999999998,0.8912499999999999,0,1,B_utilization_proxy_pdf_cost,796,71,1

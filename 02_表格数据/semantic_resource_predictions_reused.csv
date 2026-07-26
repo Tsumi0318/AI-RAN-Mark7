@@ -1,0 +1,201 @@
+node,compute_multiplier,vram_multiplier,risk_level,semantic_warning,model,resolved_model,latency_ms,prompt_tokens,completion_tokens,total_tokens,attempts,parse_ok,cache_hit
+0,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1129.1805829969235,266,43,309,1,True,True
+1,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1028.4843339468352,274,43,317,1,True,True
+2,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1080.7016660110094,265,43,308,1,True,True
+3,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1029.004417010583,266,43,309,1,True,True
+4,1.2,1.0,low,,deepseek-chat,deepseek-v4-flash,1021.8726669554599,273,43,316,1,True,True
+5,1.5,1.2,low,,deepseek-chat,deepseek-v4-flash,891.8297089985572,269,43,312,1,True,True
+6,1.2,1.1,low,"Standard TXT_2_IMG with LoRA, moderate steps and images.",deepseek-chat,deepseek-v4-flash,1257.8947079600766,269,59,328,1,True,True
+7,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,951.4360830071382,269,43,312,1,True,True
+8,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1052.737292018719,266,43,309,1,True,True
+9,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,824.463042023126,274,43,317,1,True,True
+10,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1139.6159579744563,266,43,309,1,True,True
+11,1.5,1.8,medium,High step count and image count increase compute and VRAM usage.,deepseek-chat,deepseek-v4-flash,1079.1095000458881,266,56,322,1,True,True
+12,1.5,1.2,low,,deepseek-chat,deepseek-v4-flash,1012.52425002167,269,43,312,1,True,True
+13,1.2,1.0,low,,deepseek-chat,deepseek-v4-flash,827.00179197127,270,43,313,1,True,True
+14,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,715.6828750157729,266,43,309,1,True,True
+15,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,896.9373750151135,266,43,309,1,True,True
+16,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,804.8541659954935,266,43,309,1,True,True
+17,1.2,1.0,low,,deepseek-chat,deepseek-v4-flash,847.8453750140034,265,43,308,1,True,True
+18,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1047.1240839688107,269,43,312,1,True,True
+19,1.5,1.2,low,Standard text-to-image task with moderate steps.,deepseek-chat,deepseek-v4-flash,895.1310419943184,266,52,318,1,True,True
+20,1.5,1.2,low,,deepseek-chat,deepseek-v4-flash,795.5740410252474,269,43,312,1,True,True
+21,1.8,1.5,medium,LoRA active; moderate steps and image count.,deepseek-chat,deepseek-v4-flash,1048.364209011197,266,53,319,1,True,True
+22,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,919.0674999845214,266,43,309,1,True,True
+23,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,801.9067499553785,269,43,312,1,True,True
+24,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,833.3925830083899,266,43,309,1,True,True
+25,1.5,1.3,low,LoRA active; moderate steps and image count.,deepseek-chat,deepseek-v4-flash,1015.4873749706894,270,53,323,1,True,True
+26,1.5,1.2,low,Standard text-to-image generation with moderate steps and batch size.,deepseek-chat,deepseek-v4-flash,1019.0207500127144,266,55,321,1,True,True
+27,1.5,1.2,low,Standard text-to-image generation with moderate steps.,deepseek-chat,deepseek-v4-flash,885.042457957752,266,52,318,1,True,True
+28,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,997.1585840103216,269,43,312,1,True,True
+29,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1024.3831670377403,265,43,308,1,True,True
+30,1.8,1.5,medium,Moderate prompt length and steps with 4 images; LoRA adds overhead.,deepseek-chat,deepseek-v4-flash,1220.3660839586519,273,59,332,1,True,True
+31,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,828.8253329810686,271,43,314,1,True,True
+32,1.8,1.5,medium,High step count and multiple images increase compute demand.,deepseek-chat,deepseek-v4-flash,964.4280000356957,266,53,319,1,True,True
+33,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1134.5982499769889,269,43,312,1,True,True
+34,1.8,1.5,medium,Multiple images and LoRA increase compute and VRAM demand.,deepseek-chat,deepseek-v4-flash,908.8488330016844,268,55,323,1,True,True
+35,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,716.0619999631308,269,43,312,1,True,True
+36,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,994.0729170339182,269,43,312,1,True,True
+37,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,794.5577089558356,274,43,317,1,True,True
+38,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,764.9890420143493,269,43,312,1,True,True
+39,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,794.6821249788627,266,43,309,1,True,True
+40,1.8,1.5,medium,High number of images and steps may cause memory pressure.,deepseek-chat,deepseek-v4-flash,796.172333008144,265,54,319,1,True,True
+41,1.8,1.5,medium,High step count and image count increase compute demand.,deepseek-chat,deepseek-v4-flash,1077.21274998039,266,53,319,1,True,True
+42,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,903.922249970492,269,43,312,1,True,True
+43,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1083.6581249604933,266,43,309,1,True,True
+44,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1025.164875027258,270,43,313,1,True,True
+45,1.5,1.2,low,Standard txt2img task with moderate steps and images.,deepseek-chat,deepseek-v4-flash,1059.506083955057,274,54,328,1,True,True
+46,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,765.4583750409074,274,43,317,1,True,True
+47,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,807.5469580362551,266,43,309,1,True,True
+48,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,894.5496249943972,269,43,312,1,True,True
+49,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,771.0243749897927,269,43,312,1,True,True
+50,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,901.9675420131534,271,43,314,1,True,True
+51,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,783.8503749808297,269,43,312,1,True,True
+52,1.5,1.2,low,Standard txt2img task with moderate steps and images.,deepseek-chat,deepseek-v4-flash,1077.4655830464326,271,54,325,1,True,True
+53,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,969.0193330170587,266,43,309,1,True,True
+54,1.8,1.5,medium,Multiple images with LoRA may increase VRAM usage.,deepseek-chat,deepseek-v4-flash,1159.059583034832,265,54,319,1,True,True
+55,1.5,1.3,low,Standard text-to-image generation with moderate steps and batch size.,deepseek-chat,deepseek-v4-flash,992.5857919733971,266,55,321,1,True,True
+56,1.8,1.5,medium,Multiple LoRAs and high image count increase compute and VRAM demands.,deepseek-chat,deepseek-v4-flash,955.5817090440542,268,58,326,1,True,True
+57,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,929.069832956884,271,43,314,1,True,True
+58,1.5,1.3,low,Image-to-image with 4 images and 30 steps; moderate compute demand.,deepseek-chat,deepseek-v4-flash,1017.315040982794,270,59,329,1,True,True
+59,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,948.1877090292983,274,43,317,1,True,True
+60,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,865.4886669828556,269,43,312,1,True,True
+61,1.5,1.3,low,Standard img2img task with moderate steps and batch size.,deepseek-chat,deepseek-v4-flash,914.4558329717256,265,55,320,1,True,True
+62,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1249.3314580060542,274,43,317,1,True,True
+63,1.5,1.3,low,Standard img2img task with moderate steps and images.,deepseek-chat,deepseek-v4-flash,857.6989589491859,265,54,319,1,True,True
+64,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,816.8398749548942,269,43,312,1,True,True
+65,1.8,1.5,low,High image count and steps increase compute demand.,deepseek-chat,deepseek-v4-flash,1073.1304999790154,269,52,321,1,True,True
+66,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1082.9312090063468,274,43,317,1,True,True
+67,1.2,1.1,low,Standard img2img task with moderate steps and single LoRA.,deepseek-chat,deepseek-v4-flash,1015.2307919925079,265,56,321,1,True,True
+68,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1004.6345419832505,265,43,308,1,True,True
+69,1.8,1.5,medium,IMG_2_IMG with 4 images and 30 steps; LoRA active.,deepseek-chat,deepseek-v4-flash,926.8394169630483,265,61,326,1,True,True
+70,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,833.3279999787919,269,43,312,1,True,True
+71,1.5,1.2,low,Standard text-to-image generation with moderate steps and prompt length.,deepseek-chat,deepseek-v4-flash,980.3135840338655,271,55,326,1,True,True
+72,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,845.2368330326863,266,43,309,1,True,True
+73,1.5,1.8,medium,High image count and steps increase compute and VRAM usage.,deepseek-chat,deepseek-v4-flash,1133.0265830038115,266,55,321,1,True,True
+74,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,966.9156669988297,266,43,309,1,True,True
+75,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,882.8932089963928,266,43,309,1,True,True
+76,1.8,1.5,medium,High image count and steps increase compute demand.,deepseek-chat,deepseek-v4-flash,1064.1590840532444,269,52,321,1,True,True
+77,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,883.2936669932678,269,43,312,1,True,True
+78,1.2,1.0,low,Image-to-image with moderate steps and single image; no LoRA.,deepseek-chat,deepseek-v4-flash,933.8289169827476,265,57,322,1,True,True
+79,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,744.7984999744222,265,43,308,1,True,True
+80,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1111.1264170031063,270,43,313,1,True,True
+81,1.5,1.8,medium,High number of images (8) with 30 steps may cause memory pressure.,deepseek-chat,deepseek-v4-flash,1064.6379579557106,266,59,325,1,True,True
+82,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,882.2882079984993,266,43,309,1,True,True
+83,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,857.1178750135005,269,43,312,1,True,True
+84,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1046.0443330230191,269,43,312,1,True,True
+85,1.8,1.5,medium,Multiple images with LoRA may increase VRAM usage.,deepseek-chat,deepseek-v4-flash,1051.7699999618344,265,54,319,1,True,True
+86,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,929.4646249618381,269,43,312,1,True,True
+87,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,943.2008329895325,269,43,312,1,True,True
+88,1.8,1.5,medium,Multiple LoRAs and high step count increase compute and VRAM usage.,deepseek-chat,deepseek-v4-flash,1223.735875042621,267,58,325,1,True,True
+89,1.5,1.8,medium,High image count and steps increase compute and VRAM demand.,deepseek-chat,deepseek-v4-flash,1069.900874979794,266,55,321,1,True,True
+90,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,755.605167010799,269,43,312,1,True,True
+91,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,781.895500025712,274,43,317,1,True,True
+92,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1067.9824999533594,269,43,312,1,True,True
+93,1.8,1.5,medium,Multiple LoRAs and high step count increase compute and VRAM usage.,deepseek-chat,deepseek-v4-flash,1050.1881249947473,266,58,324,1,True,True
+94,1.8,1.5,medium,Multiple images with LoRA increase compute and VRAM usage.,deepseek-chat,deepseek-v4-flash,1001.846041996032,266,55,321,1,True,True
+95,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,929.2521660099737,269,43,312,1,True,True
+96,1.0,1.0,low,Standard text-to-image generation with moderate steps and single image.,deepseek-chat,deepseek-v4-flash,946.3447499438189,271,55,326,1,True,True
+97,1.5,1.3,low,"Standard TXT_2_IMG with LoRA, moderate steps and images.",deepseek-chat,deepseek-v4-flash,1117.1067079994828,266,59,325,1,True,True
+98,1.8,1.5,low,Short prompt but high steps and image count; compute multiplier reflects observed time.,deepseek-chat,deepseek-v4-flash,970.6507080118172,269,58,327,1,True,True
+99,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,753.7720830296166,269,43,312,1,True,True
+100,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,965.473040996585,265,43,308,1,True,True
+101,1.0,1.0,low,"Short prompt, no LoRA, single image, moderate steps.",deepseek-chat,deepseek-v4-flash,980.5866249953397,264,56,320,1,True,True
+102,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,837.6376250525936,266,43,309,1,True,True
+103,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,980.6909160106443,266,43,309,1,True,True
+104,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,801.7402500263415,266,43,309,1,True,True
+105,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,869.3789159879088,269,43,312,1,True,True
+106,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,758.8055829983205,265,43,308,1,True,True
+107,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,812.9455830203369,269,43,312,1,True,True
+108,1.5,1.2,low,Standard text-to-image generation with LoRA.,deepseek-chat,deepseek-v4-flash,941.0930420272052,271,52,323,1,True,True
+109,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,854.2436670395546,269,43,312,1,True,True
+110,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,746.6158340102993,274,43,317,1,True,True
+111,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1029.775042028632,266,43,309,1,True,True
+112,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,868.5992910177447,269,43,312,1,True,True
+113,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,969.4858750444837,265,43,308,1,True,True
+114,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,898.7520830123685,266,43,309,1,True,True
+115,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,857.6562920352444,266,43,309,1,True,True
+116,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,807.9687919816934,266,43,309,1,True,True
+117,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1049.0309589658864,269,43,312,1,True,True
+118,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,804.2518750298768,271,43,314,1,True,True
+119,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,913.9315839856863,265,43,308,1,True,True
+120,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,775.9454590268433,269,43,312,1,True,True
+121,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,784.9948329967447,269,43,312,1,True,True
+122,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,799.1214590147138,266,43,309,1,True,True
+123,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,703.8492080173455,266,43,309,1,True,True
+124,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,885.8815419953316,266,43,309,1,True,True
+125,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1148.0253339977935,269,43,312,1,True,True
+126,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1030.3492090315558,269,43,312,1,True,True
+127,1.8,1.5,medium,High step count and image count increase compute demand.,deepseek-chat,deepseek-v4-flash,1082.4607910471968,266,53,319,1,True,True
+128,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,957.6579590211622,266,43,309,1,True,True
+129,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,797.3883749800734,270,43,313,1,True,True
+130,1.0,1.0,low,Standard TXT_2_IMG task with moderate steps and single image.,deepseek-chat,deepseek-v4-flash,873.3957499498501,271,58,329,1,True,True
+131,1.0,1.0,low,Standard text-to-image generation with moderate steps and single image.,deepseek-chat,deepseek-v4-flash,999.2504579713568,271,55,326,1,True,True
+132,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1025.7913329987787,269,43,312,1,True,True
+133,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1064.627040992491,266,43,309,1,True,True
+134,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,967.393875005655,266,43,309,1,True,True
+135,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,859.8817920428701,266,43,309,1,True,True
+136,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,856.7394159617834,266,43,309,1,True,True
+137,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,736.4459999953397,269,43,312,1,True,True
+138,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,934.1600830084644,265,43,308,1,True,True
+139,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,884.882916987408,269,43,312,1,True,True
+140,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,931.8402499775402,265,43,308,1,True,True
+141,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,705.249541962985,265,43,308,1,True,True
+142,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1030.5794579908252,265,43,308,1,True,True
+143,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,805.1896250108257,269,43,312,1,True,True
+144,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,732.5274159666151,266,43,309,1,True,True
+145,1.8,1.5,medium,High step count and image count increase compute demand.,deepseek-chat,deepseek-v4-flash,893.4674999909475,264,53,317,1,True,True
+146,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,808.8163749780506,265,43,308,1,True,True
+147,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,917.4884160165675,269,43,312,1,True,True
+148,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,975.011375034228,269,43,312,1,True,True
+149,1.8,1.5,medium,Moderate prompt length and steps with 2 images; LoRA adds overhead.,deepseek-chat,deepseek-v4-flash,1054.6212500194088,270,59,329,1,True,True
+150,1.5,1.3,low,"Standard txt2img with LoRA, moderate steps and images.",deepseek-chat,deepseek-v4-flash,1107.6907090027817,266,56,322,1,True,True
+151,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,757.4198340298608,269,43,312,1,True,True
+152,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,918.3609170140699,265,43,308,1,True,True
+153,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,727.712917025201,266,43,309,1,True,True
+154,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,820.142540964298,266,43,309,1,True,True
+155,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,880.4304999648593,266,43,309,1,True,True
+156,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,714.8567079566419,271,43,314,1,True,True
+157,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1027.657333004754,266,43,309,1,True,True
+158,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,851.1571250273846,266,43,309,1,True,True
+159,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,904.3133750092238,269,43,312,1,True,True
+160,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,770.3568750293925,269,43,312,1,True,True
+161,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,991.850666992832,269,43,312,1,True,True
+162,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,754.4675410026684,266,43,309,1,True,True
+163,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,951.9875000114553,266,43,309,1,True,True
+164,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,788.904957997147,269,43,312,1,True,True
+165,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,947.2876249928959,266,43,309,1,True,True
+166,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,792.5634999992326,266,43,309,1,True,True
+167,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,798.9952500211075,271,43,314,1,True,True
+168,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,904.2023749789223,265,43,308,1,True,True
+169,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,809.0845839469694,271,43,314,1,True,True
+170,1.8,1.5,low,Standard txt2img with LoRA; moderate steps and images.,deepseek-chat,deepseek-v4-flash,1036.8696670047939,271,56,327,1,True,True
+171,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,863.430208992213,274,43,317,1,True,True
+172,1.5,1.3,low,"Standard TXT_2_IMG with LoRA, moderate steps and images.",deepseek-chat,deepseek-v4-flash,1266.110500029754,273,59,332,1,True,True
+173,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,750.5259579629637,266,43,309,1,True,True
+174,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,908.3897909731604,274,43,317,1,True,True
+175,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,937.9431669949554,269,43,312,1,True,True
+176,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1211.0982919693924,274,43,317,1,True,True
+177,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,795.5201250151731,266,43,309,1,True,True
+178,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,763.2640829542652,266,43,309,1,True,True
+179,1.2,1.0,low,Standard text-to-image task with moderate steps and batch size.,deepseek-chat,deepseek-v4-flash,944.1137919784524,265,55,320,1,True,True
+180,1.8,1.5,medium,High step count and image count increase compute and VRAM usage.,deepseek-chat,deepseek-v4-flash,788.3114159922116,269,56,325,1,True,True
+181,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,850.664958008565,266,43,309,1,True,True
+182,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,953.8142500096001,266,43,309,1,True,True
+183,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,777.4887909763493,265,43,308,1,True,True
+184,1.5,1.2,low,,deepseek-chat,deepseek-v4-flash,927.3935410310514,268,43,311,1,True,True
+185,1.2,1.0,low,,deepseek-chat,deepseek-v4-flash,983.4494579699822,274,43,317,1,True,True
+186,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,973.3550829696469,266,43,309,1,True,True
+187,1.5,1.2,low,Standard txt2img workload with moderate steps and images.,deepseek-chat,deepseek-v4-flash,1036.9109580060467,271,54,325,1,True,True
+188,1.5,1.2,low,,deepseek-chat,deepseek-v4-flash,876.3475409941748,268,43,311,1,True,True
+189,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,874.8389999964274,266,43,309,1,True,True
+190,1.2,1.0,low,,deepseek-chat,deepseek-v4-flash,878.5124590503983,266,43,309,1,True,True
+191,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1007.5620830175467,271,43,314,1,True,True
+192,1.2,1.0,low,,deepseek-chat,deepseek-v4-flash,930.3177919937298,266,43,309,1,True,True
+193,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1011.0152499983087,265,43,308,1,True,True
+194,1.5,1.2,low,Short prompt but high steps; compute moderate.,deepseek-chat,deepseek-v4-flash,1275.3621659940109,271,52,323,1,True,True
+195,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1072.5128329941072,266,43,309,1,True,True
+196,1.0,1.0,low,,deepseek-chat,deepseek-v4-flash,1080.3793749655597,274,43,317,1,True,True
+197,1.8,1.5,medium,Multiple images with LoRA may increase VRAM usage.,deepseek-chat,deepseek-v4-flash,917.7550420281477,271,54,325,1,True,True
+198,1.2,1.0,low,Standard text-to-image task with moderate steps and images.,deepseek-chat,deepseek-v4-flash,1082.787958031986,269,54,323,1,True,True
+199,1.5,1.2,low,Standard TXT_2_IMG task with moderate steps and images.,deepseek-chat,deepseek-v4-flash,942.102667002473,273,57,330,1,True,True

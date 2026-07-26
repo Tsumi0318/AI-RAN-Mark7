@@ -376,7 +376,7 @@ $$
 系统只有 `2^N` 个有限策略状态，所以势函数不可能沿严格改善路径无限下降或循环。严格改善过程最终会停在不存在有利单边偏离的状态，即纯策略纳什均衡：
 
 $$
-s_i^{*}\in\mathrm{BR}_i\left(\mathbf{s}_{-i}^{*}\right),
+s_i^{*}\in\mathrm{BR}_i(\mathbf{s}_{-i}^{*}),
 \qquad \forall i\in\mathcal{N}
 $$
 

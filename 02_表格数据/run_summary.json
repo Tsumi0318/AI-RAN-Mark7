@@ -2,7 +2,7 @@
   "status": "completed",
   "experiment": "Mark7 independent end-to-end semantic-to-game run",
   "run_id": "20260726T080910Z",
-  "selected_model": "B_utilization_proxy",
+  "selected_model": "pooled_utilization_proxy",
   "semantic_generation": {
     "stage": "fresh_task_semantic_prediction",
     "run_id": "20260726T080910Z",
@@ -230,7 +230,7 @@
     "mean_vram_multiplier": 1.1349999999999998
   },
   "models": {
-    "B_utilization_proxy": {
+    "pooled_utilization_proxy": {
       "formula": "D=D_overhead+(1/(c*mu_card))*scale/(1-rho), rho=lambda*K/(c*mu_card)",
       "D_overhead_seconds": 0.21279369280515822,
       "scale": 2.3965828373686393e-06,
@@ -263,7 +263,7 @@
       "vram_load_fraction": 0.8938124999999998,
       "memory_violation_simulated": 0,
       "is_psne": 1,
-      "model": "B_utilization_proxy_pdf_cost",
+      "model": "pooled_utilization_proxy_pdf_cost",
       "updates": 858,
       "strategy_changes": 70,
       "verified_psne": 1

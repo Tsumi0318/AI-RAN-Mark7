@@ -1,5 +1,6 @@
 {
-  "selected_model": "B_utilization_proxy",
-  "selection_rule": "scheme B retained from the preceding model comparison",
-  "reason": "Mark7 changes the cost integration, not the previously selected queue family"
+  "model": "pooled_utilization_proxy",
+  "formula": "D_overhead + (1 / (c * mu_card_eff)) * a / (1 - lambda*K/(c*mu_card_eff))",
+  "selection_rule": "pre-specified model for this experiment",
+  "parameter_source": "current queue observations and current semantic calibration"
 }
